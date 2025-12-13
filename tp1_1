@@ -1,0 +1,9 @@
+import IPython
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+import numpy as np 
+import numpy.random as npr
+import scipy as sp
+import scipy.linalg as sl
+from scipy.fft import fft
+from scipy.fft import ifft
