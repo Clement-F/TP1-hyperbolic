@@ -29,22 +29,22 @@ Film=[]; F=[[],[]]
 
 U = U0(X)
 
-def g(u,v):
-    if(u<v):    return min(f(u),f(v))
-    else :      return max(f(u),f(v))
+# def g(u,v):
+#     if(u<v):    return min(f(u),f(v))
+#     else :      return max(f(u),f(v))
 
     
 
-# g = lambda u,v: 0*u + 0*v   
+g = lambda u,v: 0*u + 0*v   
 
-flux_methode="Godunov"; condition_limite="Neumann"; ghost_nodes=[0,0]; film_bool=True
+flux_methode="Roe"; condition_limite="Neumann"; ghost_nodes=[0,0]; film_bool=True
 
-# if(flux_methode == "Godunov"): 
-#     g= lambda u,v : min(f(u),f(v))*(u<v) + max(f(u),f(v))*(u>=v)
-# if(flux_methode == "Rusanov"):
-#     g= lambda u,v : 0.5*(f(u)+f(v))-0.5* max(np.abs(f_p(u)), np.abs(f_p(v))) *(v-u)
-# if(flux_methode == "Roe"):
-#     g= lambda u,v : 0.5*(f(u)+f(v))-0.5*f_p(u)*(u-v)*(u!=v) + f(u)*(u==v)
+if(flux_methode == "Godunov"): 
+    g= lambda u,v : min(f(u),f(v))*(u<v) + max(f(u),f(v))*(u>=v)
+if(flux_methode == "Rusanov"):
+    g= lambda u,v : 0.5*(f(u)+f(v))-0.5* max(np.abs(f_p(u)), np.abs(f_p(v))) *(v-u)
+if(flux_methode == "Roe"):
+    g= lambda u,v : 0.5*(f(u)+f(v))-0.5*np.abs((f_p(u)*(v-u)*(u==v) + (f(u)-f(v))*(u!=v)))
 
 FG = np.empty_like(X) 
 FD = np.empty_like(X)
