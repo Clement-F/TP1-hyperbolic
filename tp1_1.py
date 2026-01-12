@@ -38,7 +38,7 @@ def g_godunov(u,v):
     
 g = lambda u,v: 0*u + 0*v   
 
-flux_methode="Godunov"; condition_limite="Neumann"; ghost_nodes=[0,0]; film_bool=True
+flux_methode="Roe"; condition_limite="Neumann"; ghost_nodes=[0,0]; film_bool=True
 
 if(flux_methode == "Godunov"): 
     g= lambda u,v : g_godunov(u, v)
