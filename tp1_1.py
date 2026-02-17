@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np 
 
-ul=-1.;ur=1.
+ul=1.;ur=-1.
 a=0.2;b=1
 
 #u= lambda x,t: (a*x+b)/(a*t+1)
@@ -9,14 +9,14 @@ a=0.2;b=1
 
 #U0  = lambda x: ul*(x<0.5) + ur*(x>=0.5)
 #U0 = lambda x: 1*(x<0.6)*(x>0.4)
-#U0 = lambda x: np.exp(-(x-0.5)**2 /(2*0.01)) 
+U0 = lambda x: np.exp(-(x-0.5)**2 /(2*0.01)) 
 
-U0 = lambda x: np.sin(2*np.pi*x) +0*x
+#U0 = lambda x: np.sin(2*np.pi*x) +0*x
 
-f  = lambda u: -0.5* u**2
-f_p= lambda u: -u
+f  = lambda u: 0.5* u**2
+f_p= lambda u: u
 
-N=100; T=1; CFL=0.5
+N=100; T=1; CFL=1.9
 
 
 dx = 1./N
@@ -30,27 +30,31 @@ Film=[]; F=[[],[]]
 U = U0(X)
 
 def g_godunov(u,v):
-    if(u*v<=0): return 0
-    if(u*v>0):
-        if(u<v):    return min(f(u), f(v))
-        else :      return max(f(u), f(v))
+    if(u<v):
+        #if(u*v<=0):    return 0
+        return min(f(u), f(v))
+        
+    else :
+        if(u*v<=0):    return 0
+        return max(f(u), f(v))
+
 
     
 g = lambda u,v: 0*u + 0*v   
 
-flux_methode="Roe"; condition_limite="Neumann"; ghost_nodes=[0,0]; film_bool=True
+flux_methode="Godunov"; condition_limite="Neumann"; ghost_nodes=[0,0]; film_bool=True
 
 if(flux_methode == "Godunov"): 
     g= lambda u,v : g_godunov(u, v)
 if(flux_methode == "Rusanov"):
     g= lambda u,v : 0.5*(f(u)+f(v))-0.5* max(np.abs(f_p(u)), np.abs(f_p(v))) *(v-u)
 if(flux_methode == "Roe"):
-    g= lambda u,v : 0.5*(f(u)+f(v))-0.5*f_p(u)*(u-v)*(u!=v) + f(u)*(u==v)
+    g= lambda u,v : 0.5*(f(u)+f(v))-0.5*(np.abs(f_p(u))*(v-u)*(u==v)+np.sign(v-u)*np.abs(f(v)-f(u))*(u!=v))
 
 FG = np.empty_like(X) 
 FD = np.empty_like(X)
 
-Film=[]; F=[[],[]]  
+Film=[]; F=[[],[]]; T_list=[]
 
 t=0.; n =0; dt=0.
 while t<T and n<10000:
@@ -95,6 +99,7 @@ while t<T and n<10000:
         U[j] = U[j] -(dt/dx)* (FD[j]-FG[j])
 
     if(film_bool): Film.append(U.copy()); F[0].append(FD.copy()); F[1].append(FG.copy())
+    T_list.append(t)
     n+=1; t+= dt
     
 
@@ -107,11 +112,18 @@ print(t,'bloop')
 fig, ax = plt.subplots()
 im = ax.imshow(U_xt,extent=((0,1,0,1)))
 
-X = np.linspace(0,1,N); I = np.linspace(0, 1, 50)
+Y = np.linspace(0,0.1,len(X));
 
-for i in range(50): plt.plot(X*f_p(U0(I[i]))+I[i],X,'--r')
+for ti in np.arange(1,len(Film),step=100):
+    for i in np.arange(0,len(X),step=10): 
+        print(ti,i)
+        print(U_xt[ti][i]-U0(Y[i]))
+        plt.plot((X+1)*f_p(U_xt[ti][i]),Y,'--r')
+        #plt.plot((X_test-X[i]) *f_p(U_xt[ti][i]),X_test  ,'--r')
+        #plt.plot(X*f_p(U_xt[ti][i])+U_xt[ti][i],X+T_list[ti],'--r')
 
-plt.xlim(0,1)
+plt.xlim(-1,1);
+plt.ylim(-1,1)
 
 fig.colorbar(im, ax=ax, label='Interactive colorbar')
 plt.show()
